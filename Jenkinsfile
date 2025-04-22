@@ -9,9 +9,6 @@ pipeline {
 
     stages {
         stage('Build and Push') {
-            when {
-                changeset "**/rag_medical/**"
-            }
             steps {
                 script {
                     echo 'Building image for deployment...'
@@ -25,9 +22,6 @@ pipeline {
         }
 
         stage('Deploy') {
-            when {
-                changeset "**/rag_medical/**"
-            }
             agent {
                 kubernetes {
                     yaml """
