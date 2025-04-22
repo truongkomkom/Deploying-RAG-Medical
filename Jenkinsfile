@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 pipeline {
     agent any
 
