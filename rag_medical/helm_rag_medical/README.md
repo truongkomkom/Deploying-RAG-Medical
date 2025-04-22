@@ -1,0 +1,1 @@
+helm install rag-controller .\helm_rag_medical\

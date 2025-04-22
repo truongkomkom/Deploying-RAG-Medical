@@ -1,0 +1,33 @@
+namespace: rag-controller
+
+ingress: 
+  host: 34.69.203.236.sslip.io
+
+deployment:
+  name: rag-controller
+  replicaCount: 2
+  labels:
+    appName: rag-controller
+  container:
+    name: rag-controller
+    portNumber: 8005
+    args: []
+  image:
+    name: truongkomkom/truong_rag_medical
+    version: v1
+    imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 500m       
+      memory: 1Gi     
+    limits:
+      cpu: 1500m       
+      memory: 3Gi
+
+service:
+  name: rag-svc
+  type: ClusterIP
+  httpPort:
+    enable: true
+    port: 82
+    targetPort: 8005
