@@ -4,7 +4,7 @@ pipeline {
     environment{
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
-        imageTag = "v2.$BUILD_NUMBER"
+        imageTag = "v1.$BUILD_NUMBER"
     }
 
     stages {
