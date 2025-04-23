@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG = "C:/Users/MINH TRUONG/.kube/config"  // Đường dẫn đến kubeconfig của bạn
+        KUBECONFIG = "C:/Users/MINH TRUONG/.kube/config"  // Đảm bảo dùng dấu gạch chéo xuôi
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
         imageTag = "v1.$BUILD_NUMBER"
-        CLUSTER_CONTEXT = 'gke_core-veld-455815-d7_us-central1-c_cluster-1'  // Thay bằng tên context mà bạn tìm thấy
+        CLUSTER_CONTEXT = 'gke_project_name'  // Thay bằng tên context mà bạn tìm thấy
     }
 
     stages {
