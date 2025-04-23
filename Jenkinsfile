@@ -26,9 +26,8 @@ pipeline {
                 kubernetes {
                     containerTemplate {
                         name 'helm' // Tên container để sử dụng cho helm upgrade
-                        image 'lachlanevenson/k8s-helm:3.7.0' // Image Helm + kubectl khác
-                        alwaysPullImage true // Luôn kéo lại image khi chạy
-                    }
+                        image 'lacdtzar/helm-kubectl:3.13.2' // Image Helm + kubectl khác
+                        alwaysPullImage true 
                 }
             }
             steps {
