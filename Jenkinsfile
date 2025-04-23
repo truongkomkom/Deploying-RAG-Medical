@@ -26,7 +26,7 @@ pipeline {
                 kubernetes {
                     containerTemplate {
                         name 'helm' // Tên container để sử dụng cho helm upgrade
-                        image 'nthaiduong83/jenkins-k8s:v1' // Image có sẵn helm + kubectl
+                        image 'bitnami/helm:3.7.1' // Image chính thức của Helm
                         alwaysPullImage true // Luôn kéo lại image khi chạy
                     }
                 }
@@ -34,7 +34,6 @@ pipeline {
             steps {
                 script {
                     container('helm') {
-                        // Debugging step
                         echo 'Running Helm upgrade...'
                         sh """
                             echo 'Triển khai ứng dụng bằng Helm...'
