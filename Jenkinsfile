@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG = "C:/Users/MINH TRUONG/.kube/config"  // Đảm bảo dùng dấu gạch chéo xuôi
+        // Đảm bảo rằng đường dẫn được chuyển thành đúng định dạng
+        KUBECONFIG = "/c/Users/MINH TRUONG/.kube/config"  // Đảm bảo đúng định dạng Unix
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
         imageTag = "v1.$BUILD_NUMBER"
