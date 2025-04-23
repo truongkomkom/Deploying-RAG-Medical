@@ -6,6 +6,7 @@ pipeline {
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
         imageTag = "v1.$BUILD_NUMBER"
+        CLUSTER_CONTEXT = 'gke_core-veld-455815-d7_us-central1-c_cluster-1'  // Thay bằng tên context mà bạn tìm thấy
     }
 
     stages {
@@ -25,10 +26,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Chạy các lệnh kubectl hoặc helm, và xác thực từ kubeconfig
+                    // Chọn context từ kubeconfig trước khi chạy lệnh Helm
                     echo '🚢 Running Helm upgrade...'
                     sh """
                         export KUBECONFIG=${KUBECONFIG}
+                        kubectl config use-context ${CLUSTER_CONTEXT}  // Chỉ định context
                         helm upgrade --install rag-medical ./rag_medical/helm_rag_medical --namespace rag-controller --create-namespace --set deployment.image.name=${registry} --set deployment.image.version=${imageTag}
                     """
                 }
