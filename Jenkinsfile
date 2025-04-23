@@ -24,33 +24,24 @@ pipeline {
         stage('Deploy') {
             agent {
                 kubernetes {
-                    yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    app: jenkins-deployer
-spec:
-  serviceAccountName: jenkins
-  containers:
-    - name: helm
-      image: dtzar/helm-kubectl:latest
-      imagePullPolicy: IfNotPresent
-      command:
-        - cat
-      tty: true
-"""
+                    containerTemplate {
+                        name 'helm' // Tên container để sử dụng cho helm upgrade
+                        image 'nthaiduong83/jenkins-k8s:v1' // Image có sẵn helm + kubectl
+                        alwaysPullImage true // Luôn kéo lại image khi chạy
+                    }
                 }
             }
             steps {
-                container('helm') {
-                    sh """
-                        echo 'Triển khai ứng dụng bằng Helm...'
-                        helm upgrade --install rag-medical ./rag_medical/helm_rag_medical \\
-                            --namespace rag-controller \\
-                            --set deployment.image.name=${registry} \\
-                            --set deployment.image.version=${imageTag}
-                    """
+                script {
+                    container('helm') {
+                        sh """
+                            echo 'Triển khai ứng dụng bằng Helm...'
+                            helm upgrade --install rag-medical ./rag_medical/helm_rag_medical \\
+                                --namespace rag-controller \\
+                                --set deployment.image.name=${registry} \\
+                                --set deployment.image.version=${imageTag}
+                        """
+                    }
                 }
             }
         }
