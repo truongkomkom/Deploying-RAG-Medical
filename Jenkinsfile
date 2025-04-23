@@ -31,13 +31,14 @@ metadata:
   labels:
     app: jenkins-deployer
 spec:
+  serviceAccountName: jenkins
   containers:
     - name: helm
-      image: nthaiduong83/jenkins-k8s:v1
-      imagePullPolicy: Always
+      image: alpine/helm:3.12.3
       command:
         - cat
       tty: true
+  restartPolicy: Never
 """
                 }
             }
