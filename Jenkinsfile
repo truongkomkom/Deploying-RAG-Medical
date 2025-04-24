@@ -1,18 +1,22 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout()
+    }
+
     environment {
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
         imageTag = "v1.$BUILD_NUMBER"
         CLUSTER_CONTEXT = 'gke_core-veld-455815-d7_us-central1-c_cluster-1'
-        KUBECONFIG = '/root/.kube/config'  // Vì bạn chạy container Jenkins với user root (-u 0)
+        KUBECONFIG = '/root/.kube/config'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/truongkomkom/Deploying-RAG-Medical.git', branch: 'main'
+                sh 'git clone https://github.com/truongkomkom/Deploying-RAG-Medical.git .'
             }
         }
 
