@@ -87,20 +87,4 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed!'
-            sh """
-                echo "Current GCP account:"
-                gcloud auth list
-                echo "Current project:"
-                gcloud config get-value project
-                echo "Cluster status:"
-                gcloud container clusters describe ${CLUSTER_NAME} --zone ${CLUSTER_ZONE} --project ${PROJECT_ID} || true
-            """
-        }
-    }
 }
