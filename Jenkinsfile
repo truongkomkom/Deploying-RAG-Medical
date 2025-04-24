@@ -14,6 +14,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 sh 'git clone https://github.com/truongkomkom/Deploying-RAG-Medical.git .'
