@@ -22,15 +22,19 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Check for Changes') {
             steps {
                 script {
                     // Lấy danh sách các file đã thay đổi
                     def changedFiles = sh(script: 'git diff --name-only HEAD^ HEAD || git diff --name-only origin/main HEAD', returnStdout: true).trim()
                     
-                    
-                    env.CHANGES_IN_MAIN = changedFiles.contains("./rag_medical/main.py") ? "true" : "false"
+                    // Kiểm tra xem file main.py có thay đổi không
+                    if (changedFiles.contains("./rag_medical/main.py")) {
+                        env.CHANGES_IN_MAIN = "true"
+                    } else {
+                        env.CHANGES_IN_MAIN = "false"
+                    }
                     
                     echo "Changes in main file: ${env.CHANGES_IN_MAIN}"
                 }
@@ -65,7 +69,6 @@ pipeline {
             }
             steps {
                 withCredentials([file(credentialsId: 'gcp-credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    // Sử dụng biến môi trường thay vì truyền trực tiếp trong lệnh
                     sh '''
                         # Activate service account - tránh sử dụng biến nhạy cảm trực tiếp
                         gcloud auth activate-service-account --key-file="${GOOGLE_APPLICATION_CREDENTIALS}"
@@ -110,7 +113,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo '✅ Pipeline completed successfully!'
