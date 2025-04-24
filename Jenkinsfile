@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     options {
         skipDefaultCheckout()
@@ -30,11 +35,12 @@ pipeline {
             steps {
                 script {
                     echo '🔧 Building image for deployment...'
-                    def dockerImage = docker.build("${registry}:${imageTag}", "-f ./rag_medical/Dockerfile ./rag_medical")
+                    sh "docker build -t ${registry}:${imageTag} -f ./rag_medical/Dockerfile ./rag_medical"
                     echo '🚀 Pushing image to Docker Hub...'
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                        dockerImage.push('latest')  // Also push as latest tag
+                    withCredentials([usernamePassword(credentialsId: registryCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                        sh "docker push ${registry}:${imageTag}"
+                        sh "docker push ${registry}:latest"
                     }
                 }
             }
