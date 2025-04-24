@@ -8,7 +8,6 @@ pipeline {
         CLUSTER_NAME = 'cluster-1'
         CLUSTER_ZONE = 'us-central1-c'
         PROJECT_ID = 'core-veld-455815'
-        KUBECONFIG = '/root/.kube/config'
     }
 
     stages {
@@ -20,7 +19,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                sh 'git clone https://github.com/truongkomkom/Deploying-RAG-Medical.git .'
+                // Checkout code from SCM rather than cloning explicitly
+                checkout scm
             }
         }
 
@@ -46,9 +46,26 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'gcp-credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh """
+                        # Activate service account
                         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                        
+                        # Set project
                         gcloud config set project ${PROJECT_ID}
-                        gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+                        
+                        # Verify project access
+                        if ! gcloud projects describe ${PROJECT_ID} > /dev/null 2>&1; then
+                            echo "ERROR: No access to project ${PROJECT_ID}"
+                            exit 1
+                        fi
+                        
+                        # Get cluster credentials
+                        gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE} --project ${PROJECT_ID}
+                        
+                        # Verify cluster access
+                        if ! kubectl get nodes > /dev/null 2>&1; then
+                            echo "ERROR: Cannot access GKE cluster"
+                            exit 1
+                        fi
                     """
                 }
             }
@@ -63,7 +80,7 @@ pipeline {
                           --namespace rag-controller --create-namespace \
                           --set deployment.image.name=${registry} \
                           --set deployment.image.version=${imageTag} \
-                          --atomic
+                          --atomic --wait
                     """
                 }
             }
@@ -76,6 +93,14 @@ pipeline {
         }
         failure {
             echo '❌ Pipeline failed!'
+            sh """
+                echo "Current GCP account:"
+                gcloud auth list
+                echo "Current project:"
+                gcloud config get-value project
+                echo "Cluster status:"
+                gcloud container clusters describe ${CLUSTER_NAME} --zone ${CLUSTER_ZONE} --project ${PROJECT_ID} || true
+            """
         }
     }
 }
