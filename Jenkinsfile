@@ -23,28 +23,7 @@ pipeline {
             }
         }
 
-        stage('Check for Changes') {
-            steps {
-                script {
-                    // Lấy danh sách các file đã thay đổi
-                    def changedFiles = sh(script: 'git diff --name-only HEAD^ HEAD || git diff --name-only origin/main HEAD', returnStdout: true).trim()
-                    
-                    // Kiểm tra xem file main.py có thay đổi không
-                    if (changedFiles.contains("./rag_medical/main.py")) {
-                        env.CHANGES_IN_MAIN = "true"
-                    } else {
-                        env.CHANGES_IN_MAIN = "false"
-                    }
-                    
-                    echo "Changes in main file: ${env.CHANGES_IN_MAIN}"
-                }
-            }
-        }
-
         stage('Build and Push') {
-            when {
-                expression { return env.CHANGES_IN_MAIN == "true" }
-            }
             steps {
                 script {
                     echo '🔧 Building image for deployment...'
@@ -63,9 +42,6 @@ pipeline {
         }
 
         stage('Authenticate GCP') {
-            when {
-                expression { return env.CHANGES_IN_MAIN == "true" }
-            }
             steps {
                 withCredentials([file(credentialsId: 'gcp-credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh """
@@ -95,9 +71,6 @@ pipeline {
         }
 
         stage('Deploy to GKE with Helm') {
-            when {
-                expression { return env.CHANGES_IN_MAIN == "true" }
-            }
             steps {
                 script {
                     echo '🚢 Running Helm upgrade...'
