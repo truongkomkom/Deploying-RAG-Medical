@@ -10,6 +10,12 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/truongkomkom/Deploying-RAG-Medical.git', branch: 'main'
+            }
+        }
+
         stage('Build and Push') {
             steps {
                 script {
@@ -18,6 +24,7 @@ pipeline {
                     echo '🚀 Pushing image to Docker Hub...'
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
+                        dockerImage.push('latest')  // Also push as latest tag
                     }
                 }
             }
@@ -33,10 +40,20 @@ pipeline {
                         helm upgrade --install rag-medical ./rag_medical/helm_rag_medical \
                           --namespace rag-controller --create-namespace \
                           --set deployment.image.name=${registry} \
-                          --set deployment.image.version=${imageTag}
+                          --set deployment.image.version=${imageTag} \
+                          --atomic  # Rollback on failure
                     """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully!'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
         }
     }
 }
