@@ -7,7 +7,7 @@ pipeline {
         imageTag = "v1.$BUILD_NUMBER"
         CLUSTER_NAME = 'cluster-1'
         CLUSTER_ZONE = 'us-central1-c'
-        PROJECT_ID = 'core-veld-455815'
+        PROJECT_ID = 'core-veld-455815-d7'  // Sửa thành project ID đúng
     }
 
     stages {
