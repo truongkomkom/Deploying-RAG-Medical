@@ -75,7 +75,7 @@ pipeline {
                 script {
                     echo '🚢 Running Helm upgrade...'
                     sh """
-                        helm upgrade --install rag-medical ./rag_medical/helm_rag_medical \
+                        helm upgrade --install rag-controller ./rag_medical/helm_rag_medical \
                           --namespace rag-controller --create-namespace \
                           --set deployment.image.name=${registry} \
                           --set deployment.image.version=${imageTag} \
