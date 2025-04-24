@@ -51,9 +51,8 @@ pipeline {
                     sh "docker build -t ${registry}:${imageTag} -f ./rag_medical/Dockerfile ./rag_medical"
                     echo '🚀 Pushing image to Docker Hub...'
                     withCredentials([usernamePassword(credentialsId: registryCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                         sh """
+                            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
                             docker push ${registry}:${imageTag}
                             docker tag ${registry}:${imageTag} ${registry}:latest
                             docker push ${registry}:latest
@@ -69,9 +68,9 @@ pipeline {
             }
             steps {
                 withCredentials([file(credentialsId: 'gcp-credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    sh '''
-                        # Activate service account - tránh sử dụng biến nhạy cảm trực tiếp
-                        gcloud auth activate-service-account --key-file="${GOOGLE_APPLICATION_CREDENTIALS}"
+                    sh """
+                        # Activate service account
+                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                         
                         # Set project
                         gcloud config set project ${PROJECT_ID}
@@ -90,7 +89,7 @@ pipeline {
                             echo "ERROR: Cannot access GKE cluster"
                             exit 1
                         fi
-                    '''
+                    """
                 }
             }
         }
@@ -103,7 +102,7 @@ pipeline {
                 script {
                     echo '🚢 Running Helm upgrade...'
                     sh """
-                        helm upgrade --install rag-controller ./rag_medical/helm_rag_medical \
+                        helm upgrade --install rag-medical ./rag_medical/helm_rag_medical \
                           --namespace rag-controller --create-namespace \
                           --set deployment.image.name=${registry} \
                           --set deployment.image.version=${imageTag} \
