@@ -1,19 +1,10 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-
-    options {
-        skipDefaultCheckout()
-    }
+    agent any
 
     environment {
         registry = 'truongkomkom/truong_rag_medical'
         registryCredential = 'dockerhub'
-        imageTag = "v1.$BUILD_NUMBER"
+        imageTag = "v1.${BUILD_NUMBER}"
         CLUSTER_CONTEXT = 'gke_core-veld-455815-d7_us-central1-c_cluster-1'
         KUBECONFIG = '/root/.kube/config'
     }
@@ -27,7 +18,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                sh 'git clone https://github.com/truongkomkom/Deploying-RAG-Medical.git .'
+                checkout scm
             }
         }
 
@@ -36,11 +27,11 @@ pipeline {
                 script {
                     echo '🔧 Building image for deployment...'
                     sh "docker build -t ${registry}:${imageTag} -f ./rag_medical/Dockerfile ./rag_medical"
+
                     echo '🚀 Pushing image to Docker Hub...'
                     withCredentials([usernamePassword(credentialsId: registryCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                         sh "docker push ${registry}:${imageTag}"
-                        sh "docker push ${registry}:latest"
                     }
                 }
             }
@@ -57,7 +48,7 @@ pipeline {
                           --namespace rag-controller --create-namespace \
                           --set deployment.image.name=${registry} \
                           --set deployment.image.version=${imageTag} \
-                          --atomic  # Rollback on failure
+                          --atomic
                     """
                 }
             }
