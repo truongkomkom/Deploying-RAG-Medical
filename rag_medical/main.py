@@ -146,7 +146,7 @@ def health_check():
     with tracer.start_as_current_span("health_check") as health_span:
         health_span.set_attribute("http.method", "GET")
         health_span.set_attribute("http.route", "/healthz")
-        return JSONResponse(status_code=200, content={"status": "oke con dê 111", "message": "Healthy"})
+        return JSONResponse(status_code=200, content={"status": "oke con dê", "message": "Healthy"})
 
 # Add middleware for tracing all requests
 @app.middleware("http")
