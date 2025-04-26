@@ -1,0 +1,1 @@
+helm upgrade --install text-vectorizer ./embedding/helm_embedding  --namespace emb --create-namespace  -f ./embedding/helm_embedding/values.yaml
